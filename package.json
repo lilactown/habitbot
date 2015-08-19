@@ -1,0 +1,24 @@
+{
+  "name": "habitbot",
+  "version": "1.0.0",
+  "description": "habitica slack bot",
+  "main": "dist/index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "slack",
+    "bot",
+    "habitca"
+  ],
+  "author": "Will Acton",
+  "license": "MIT",
+  "devDependencies": {
+    "grunt": "^0.4.5",
+    "grunt-babel": "^5.0.1",
+    "grunt-contrib-watch": "^0.6.1"
+  },
+  "dependencies": {
+    "slack-client": "^1.4.1"
+  }
+}
