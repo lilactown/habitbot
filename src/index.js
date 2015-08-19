@@ -4,10 +4,10 @@
 
 // const Slack = require('slack-client');
 import { default as Slack } from 'slack-client';
-import { default as Promise } from 'bluebird';
 import { map, filter } from 'lodash/collection';
-import { has } from 'lodash/object';
+import { has, get } from 'lodash/object';
 import { readFileSync } from 'fs';
+import { habitApi } from './habit.js';
 
 // import api token
 const token = readFileSync('apiToken', { encoding: 'utf8' });
@@ -16,13 +16,60 @@ const autoMark = true;
 
 const slack = new Slack(token, autoReconnect, autoMark);
 
+function sendToChannel(channel, text) {
+	channel.send(text);
+	console.log(`[${channel.name}] > ${text}`);
+}
+
 const commands = {
-	hello: (channel, userName) => {
-		const message = `Hello, ${userName}! My name is habitbot. Type "@habitbot: help" for more info.`;
-		channel.send(message);
-		console.log(`[${channel}] > ${message}`);
+	hello(channel, user) {
+		const message = `Hello, ${user.name}! My name is habitbot. Type "@habitbot: help" for more info.`;
+		sendToChannel(channel, message);
+	},
+	say(channel, user, ...parts) {
+		const message = parts.join(" ");
+		sendToChannel(channel, message);
+	},
+	partyData(channel, user, path) {
+		sendToChannel(channel, "Querying...");
+
+		const getPath = (json) => {
+			if (has(json, path)) {
+				console.log(get(json, path));
+				return get(json, path);
+			}
+			else {
+				return "Value is undefined.";
+			}
+		};
+
+		const sendValue = (value) => sendToChannel(channel, JSON.stringify(value));
+
+		habitApi
+			.getParty()
+			.then(getPath)
+			.then(sendValue)
+			.catch((err) => console.error(err));
+	},
+	partyList(channel, user) {
+		sendToChannel(channel, "Querying...");
 	}
 };
+
+function isCommand(string) {
+	return has(commands, string);
+}
+
+function runCommand(command, ...args) {
+	return commands[command](...args);
+} 
+
+function parseCommand(channel, user, text) {
+	const [command, ...args] = text.split(' ');
+	if (isCommand(command)) {
+		runCommand(command, channel, user, ...args);
+	}
+}
 
 function currentChannels(channels) {
 	return map(
@@ -44,7 +91,7 @@ function isDirect(id, text) {
 }
 
 function stripTag(id, text) {
-	const tag=`<@${id}>: `;
+	const tag = `<@${id}>: `;
 	return text.substr(tag.length);
 }
 
@@ -67,15 +114,14 @@ slack.on('message', (message) => {
 		const userName = has(user, 'name') ? user.name : 'UKNNOWN_USER';
 		const channelName = channel ? channel.name : 'UKNOWN_CHANNEL';
 		const msg = stripTag(slack.self.id, text);
+
 		console.log(`[${type}:#${channelName}] ${userName} ${ts}> ${msg}`);
 
-		if (msg === 'hello') {
-			commands.hello(channel, userName);
-		}
+		parseCommand(channel, user, msg);
 	}
 });
 
-slack.on('error', (err) => console.error(...err));
+slack.on('error', (err) => console.error(err));
 
 // let's go
 slack.login();
