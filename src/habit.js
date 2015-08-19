@@ -1,4 +1,5 @@
 // habitica API
+import { Promise } from 'bluebird';
 import { readFileSync } from 'fs';
 import { get as httpGet } from 'https';
 
@@ -36,5 +37,8 @@ export const habitApi = {
 	},
 	getParty() {
 		return this.endpoint('groups', config.groupId);
+	},
+	getMember(id) {
+		return this.endpoint('members', id);
 	}
 };

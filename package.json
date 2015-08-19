@@ -20,6 +20,7 @@
     "grunt-contrib-watch": "^0.6.1"
   },
   "dependencies": {
+    "bluebird": "^2.9.34",
     "lodash": "^3.10.1",
     "slack-client": "^1.4.1"
   }
