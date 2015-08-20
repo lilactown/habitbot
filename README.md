@@ -1,5 +1,5 @@
 # habitbot
-## Integrating your Habitica party with Slack chat
+**Integrating your Habitica party with Slack chat**
 
 To run:
 
