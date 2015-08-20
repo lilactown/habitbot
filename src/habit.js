@@ -40,5 +40,14 @@ export const habitApi = {
 	},
 	getMember(id) {
 		return this.endpoint('members', id);
+	},
+	getPartyMembersInfo() {
+		return this.getParty()
+			.then((json) => json.members.map((member) => member._id))
+			.then((idArray) =>
+				Promise.all(idArray.map((id) =>
+					habitApi.getMember(id)
+				))
+			)
 	}
 };
